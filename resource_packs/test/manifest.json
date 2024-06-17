@@ -1,0 +1,24 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "§f§l[§5§lSHY§f§l] §cTest Pack",
+    "description": "§f§l[§a§lRP§f§l] §r§cThis is a test!",
+    "uuid": "9d9cf63f-7904-4202-91e1-f11591c24c39",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 30]
+  },
+  "modules": [
+    {
+      "description": "Shypack Resource Pack",
+      "type": "resources",
+      "uuid": "c90028f2-0371-4946-ad66-828c32ba01ed",
+      "version": [1, 0, 0]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "9d0ed7c3-287b-409a-bd21-5600542e15c8",
+      "version": [1, 0, 0]
+    }
+  ]
+}
