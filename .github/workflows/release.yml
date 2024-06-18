@@ -1,0 +1,56 @@
+name: Release Addons
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Get addons list
+        id: get_addons
+        run: echo "::set-output name=addons::$(cat addons.json | jq -r '.addons | join(" ")')"
+
+      - name: Compile addons
+        run: |
+          mkdir -p shypack
+          for addon in ${{ steps.get_addons.outputs.addons }}
+          do
+            echo "Compiling $addon"
+            echo "PROJECT_NAME=$addon" > .env
+            npm run mcaddon
+            cp -r ./dist/packages/* ./shypack/
+          done
+
+      - name: Zip shypack
+        run: |
+          zip -r shypack.zip shypack
+
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./shypack.zip
+          asset_name: shypack.zip
+          asset_content_type: application/zip
