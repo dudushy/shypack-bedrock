@@ -11,22 +11,22 @@
 
 ## How to install and run:
 1. Set the execution policy to bypass using `PowerShell`:
-    ```shell
+    ```ps
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     ```
 2. Install packages:
-    ```bash
+    ```sh
     npm ci
     ```
 3. Run project:
-    ```bash
+    ```sh
     npm start
     ```
 
 ## How to build:
 1. Select the addon you want to build then rename the `PROJECT_NAME` in the `.env` file
 2. Run the addon command:
-    ```bash
+    ```sh
     npm run mcaddon
     ```
 
