@@ -6,10 +6,5 @@
     "**/node_modules": true,
     "**/dist": true,
     "**/lib": true
-  },
-  "files.exclude": {
-    "**/.git": true,
-    "**/.DS_Store": true,
-    "**/node_modules": true
-  },
+  }
 }
