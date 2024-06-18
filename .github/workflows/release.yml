@@ -8,6 +8,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Ensure the workflow has write permissions
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -17,7 +19,8 @@ jobs:
 
       - name: Get addons list
         id: get_addons
-        run: echo "::set-output name=addons::$(cat addons.json | jq -r '.addons | join(" ")')"
+        run: |
+          echo "addons=$(cat addons.json | jq -r '.addons | join(" ")')" >> $GITHUB_OUTPUT
 
       - name: Compile addons
         run: |
