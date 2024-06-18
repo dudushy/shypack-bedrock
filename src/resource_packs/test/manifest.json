@@ -9,7 +9,6 @@
   },
   "modules": [
     {
-      "description": "Shypack Resource Pack",
       "type": "resources",
       "uuid": "c90028f2-0371-4946-ad66-828c32ba01ed",
       "version": [1, 0, 0]

@@ -1,18 +1,17 @@
 {
   "format_version": 2,
   "header": {
-    "name": "§f§l[§5§lSHY§f§l] §cTest Pack",
-    "description": "§f§l[§b§lBP§f§l] §r§cThis is a test!",
-    "uuid": "9d0ed7c3-287b-409a-bd21-5600542e15c8",
+    "name": "§f§l[§5§lSHY§f§l] §9One Player Sleep§r",
+    "description": "§f§l[§b§lBP§f§l] §r§9Allows one player to sleep and skip the night.§r",
+    "uuid": "57cef75e-54f3-4621-a5b5-81161b705dbd",
     "version": [1, 0, 0],
     "min_engine_version": [1, 20, 30]
   },
   "modules": [
     {
-      "description": "Script resources",
       "language": "javascript",
       "type": "script",
-      "uuid": "dfd999b2-e8a6-4547-a89f-6739ec39ebc8",
+      "uuid": "72e1102f-b4c2-4be3-a05e-102f90107390",
       "version": [1, 0, 0],
       "entry": "scripts/main.js"
     }
@@ -21,10 +20,6 @@
     {
       "module_name": "@minecraft/server",
       "version": "1.8.0"
-    },
-    {
-      "uuid": "9d9cf63f-7904-4202-91e1-f11591c24c39",
-      "version": [1, 0, 0]
     }
   ]
 }

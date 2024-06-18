@@ -16,13 +16,14 @@ import {
   watchTask,
 } from "@minecraft/core-build-tasks";
 import path from "path";
+import fs from "fs";
 
 // Setup env variables
 setupEnvironment(path.resolve(__dirname, ".env"));
 const projectName = getOrThrowFromProcess("PROJECT_NAME");
 
 const bundleTaskOptions: BundleTaskParameters = {
-  entryPoint: path.join(__dirname, "./scripts/main.ts"),
+  entryPoint: path.join(__dirname, `./src/scripts/${projectName}/index.ts`),
   external: ["@minecraft/server", "@minecraft/server-ui"],
   outfile: path.resolve(__dirname, "./dist/scripts/main.js"),
   minifyWhitespace: false,
@@ -30,11 +31,8 @@ const bundleTaskOptions: BundleTaskParameters = {
   outputSourcemapPath: path.resolve(__dirname, "./dist/debug"),
 };
 
-const copyTaskOptions: CopyTaskParameters = {
-  copyToBehaviorPacks: [`./behavior_packs/${projectName}`],
-  copyToScripts: ["./dist/scripts"],
-  copyToResourcePacks: [`./resource_packs/${projectName}`],
-};
+// Generate copy task options based on the presence of the resource pack
+const copyTaskOptions = getCopyTaskOptions();
 
 const mcaddonTaskOptions: ZipTaskParameters = {
   ...copyTaskOptions,
@@ -42,7 +40,7 @@ const mcaddonTaskOptions: ZipTaskParameters = {
 };
 
 // Lint
-task("lint", coreLint(["scripts/**/*.ts"], argv().fix));
+task("lint", coreLint(["src/scripts/**/*.ts"], argv().fix));
 
 // Build
 task("typescript", tscTask());
@@ -62,7 +60,7 @@ task("package", series("clean-collateral", "copyArtifacts"));
 task(
   "local-deploy",
   watchTask(
-    ["scripts/**/*.ts", "behavior_packs/**/*.{json,lang,png}", "resource_packs/**/*.{json,lang,png}"],
+    ["src/scripts/**/*.ts", "src/behavior_packs/**/*.{json,lang,png}", "src/resource_packs/**/*.{json,lang,png}"],
     series("clean-local", "build", "package")
   )
 );
@@ -70,3 +68,18 @@ task(
 // Mcaddon
 task("createMcaddonFile", mcaddonTask(mcaddonTaskOptions));
 task("mcaddon", series("clean-local", "build", "createMcaddonFile"));
+
+// Utility function to check if the resource pack exists
+function getCopyTaskOptions(): CopyTaskParameters {
+  const resourcePackPath = path.resolve(__dirname, `./src/resource_packs/${projectName}`);
+  const copyTaskOptions: CopyTaskParameters = {
+    copyToBehaviorPacks: [`./src/behavior_packs/${projectName}`],
+    copyToScripts: ["./dist/scripts"],
+  };
+
+  if (fs.existsSync(resourcePackPath)) {
+    copyTaskOptions.copyToResourcePacks = [resourcePackPath];
+  }
+
+  return copyTaskOptions;
+}

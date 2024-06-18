@@ -1,0 +1,29 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "§f§l[§5§lSHY§f§l] §cTest Pack",
+    "description": "§f§l[§b§lBP§f§l] §r§cThis is a test!",
+    "uuid": "9d0ed7c3-287b-409a-bd21-5600542e15c8",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 30]
+  },
+  "modules": [
+    {
+      "language": "javascript",
+      "type": "script",
+      "uuid": "dfd999b2-e8a6-4547-a89f-6739ec39ebc8",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.8.0"
+    },
+    {
+      "uuid": "9d9cf63f-7904-4202-91e1-f11591c24c39",
+      "version": [1, 0, 0]
+    }
+  ]
+}

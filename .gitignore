@@ -1,5 +1,7 @@
 *.zip
 /sample
+/assets/ignore/*
+!/assets/ignore/.gitkeep
 
 # Compiled output
 /dist
