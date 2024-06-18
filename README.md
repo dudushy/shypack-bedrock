@@ -10,22 +10,22 @@
 - [NodeJS `v20.11.0`](https://nodejs.org/download/release/v20.11.0/)
 
 ## How to install and run:
-1. Set the execution policy to bypass
+1. Set the execution policy to bypass using `PowerShell`:
     ```shell
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     ```
-2. Install packages
+2. Install packages:
     ```bash
-    npm i
+    npm ci
     ```
-3. Run project
+3. Run project:
     ```bash
     npm start
     ```
 
 ## How to build:
 1. Select the addon you want to build then rename the `PROJECT_NAME` in the `.env` file
-2. Run the addon command
+2. Run the addon command:
     ```bash
     npm run mcaddon
     ```
