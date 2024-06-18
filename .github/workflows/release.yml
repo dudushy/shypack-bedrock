@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   release:
@@ -30,6 +31,7 @@ jobs:
             echo "Compiling $addon"
             echo "PROJECT_NAME=$addon" > .env
             npm run mcaddon
+            mkdir -p ./shypack/$addon
             cp -r ./dist/packages/* ./shypack/$addon/
           done
 
