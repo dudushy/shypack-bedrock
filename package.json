@@ -1,6 +1,6 @@
 {
   "name": "shypack-bedrock",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "productName": "Shypack (Bedrock)",
   "description": "A Minecraft Bedrock Addon",
   "private": true,
