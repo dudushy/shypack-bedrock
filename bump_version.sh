@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get the latest tag
-latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null)
 
 # Extract the version number and increment it
 if [[ $latest_tag =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
@@ -11,6 +11,12 @@ if [[ $latest_tag =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
   new_tag="v$major.$minor.$((patch+1))"
 else
   new_tag="v1.0.0"
+fi
+
+# Check if the new tag already exists
+if git rev-parse "$new_tag" >/dev/null 2>&1; then
+  echo "Tag $new_tag already exists. Exiting."
+  exit 1
 fi
 
 # Create a new tag
