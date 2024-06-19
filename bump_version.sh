@@ -6,7 +6,7 @@ set -e
 git fetch --tags
 
 # Get the current version from package.json
-current_version=$(jq -r '.version' package.json)
+current_version=$(grep -oP '"version": "\K[0-9]+\.[0-9]+\.[0-9]+' package.json)
 
 # Extract the version number and increment the patch version
 if [[ $current_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
@@ -19,9 +19,13 @@ else
   exit 1
 fi
 
-# Update the version in package.json and package-lock.json
-jq --arg new_version "$new_version" '.version = $new_version' package.json > package.json.tmp && mv package.json.tmp package.json
-jq --arg new_version "$new_version" '.version = $new_version' package-lock.json > package-lock.json.tmp && mv package-lock.json.tmp package-lock.json
+# Update the version in package.json
+sed -i.bak -E "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/" package.json
+rm package.json.bak
+
+# Update the version in package-lock.json
+sed -i.bak -E "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/" package-lock.json
+rm package-lock.json.bak
 
 # Commit the version bump
 git add package.json package-lock.json
