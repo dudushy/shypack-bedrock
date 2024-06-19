@@ -29,6 +29,10 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Set execute permission on bump_version.sh
+        if: steps.check_message.outcome == 'success'
+        run: chmod +x bump_version.sh
+
       - name: Bump version and create tag
         if: steps.check_message.outcome == 'success'
         run: ./bump_version.sh
