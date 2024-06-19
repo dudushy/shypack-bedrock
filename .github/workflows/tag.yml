@@ -1,0 +1,36 @@
+name: Auto Tag
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create_tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check for release keyword
+        id: check_message
+        run: |
+          commit_message=$(git log -1 --pretty=%B)
+          echo "Commit message: $commit_message"
+          if [[ "$commit_message" != *"--release"* ]]; then
+            echo "Commit message does not contain '--release'. Exiting."
+            exit 0
+          fi
+          echo "Commit message contains '--release'. Proceeding."
+
+      - name: Set up Git
+        if: steps.check_message.outcome == 'success'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version and create tag
+        if: steps.check_message.outcome == 'success'
+        run: ./bump_version.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
