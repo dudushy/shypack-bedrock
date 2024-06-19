@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Fetch tags from remote
+git fetch --tags
+
 # Get the latest tag
 latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null)
 
@@ -15,8 +18,9 @@ fi
 
 # Check if the new tag already exists
 if git rev-parse "$new_tag" >/dev/null 2>&1; then
-  echo "Tag $new_tag already exists. Exiting."
-  exit 1
+  echo "Tag $new_tag already exists. Incrementing patch version."
+  patch=$((patch+1))
+  new_tag="v$major.$minor.$((patch+1))"
 fi
 
 # Create a new tag
