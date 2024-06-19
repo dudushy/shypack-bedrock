@@ -1,5 +1,3 @@
-
-
 ![stars][stars] ![watchers][watchers] ![forks][forks] ![issues][issues] ![pull_requests][pull_requests] ![branches][branches]
 
 # shypack-bedrock
