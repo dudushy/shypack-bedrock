@@ -1,8 +1,8 @@
 {
-  "name": "shypack",
-  "version": "0.0.1",
+  "name": "shypack-bedrock",
+  "version": "0.0.0",
   "productName": "Shypack (Bedrock)",
-  "description": "Shypack (Bedrock)",
+  "description": "A Minecraft Bedrock Addon",
   "private": true,
   "devDependencies": {
     "@minecraft/core-build-tasks": "^1.1.3",
