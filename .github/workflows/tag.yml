@@ -9,6 +9,8 @@ on:
 jobs:
   create_tag:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Ensure the workflow has write permissions
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -20,22 +22,22 @@ jobs:
           echo "Commit message: $commit_message"
           if [[ "$commit_message" != *"--release"* ]]; then
             echo "Commit message does not contain '--release'. Exiting."
-            exit 0
+            exit 1
           fi
           echo "Commit message contains '--release'. Proceeding."
 
       - name: Set up Git
-        if: steps.check_message.outcome == 'success'
+        if: success()
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Set execute permission on bump_version.sh
-        if: steps.check_message.outcome == 'success'
+        if: success()
         run: chmod +x bump_version.sh
 
       - name: Bump version and create tag
-        if: steps.check_message.outcome == 'success'
+        if: success()
         run: ./bump_version.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
