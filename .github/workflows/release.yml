@@ -16,17 +16,18 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download artifact from Auto Tag workflow
-        uses: actions/download-artifact@v3
-        with:
-          name: tag_name
-          path: .
-
-      - name: Debug Artifact
-        run: cat tag_name.txt
-
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Fetch tags
+        run: git fetch --tags
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: echo "latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
+
+      - name: Debug latest tag
+        run: echo "Latest tag is ${{ steps.get_latest_tag.outputs.latest_tag }}"
 
       - name: Install dependencies
         run: npm install
@@ -58,8 +59,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: $(cat tag_name.txt)
-          release_name: $(cat tag_name.txt)
+          tag_name: ${{ steps.get_latest_tag.outputs.latest_tag }}
+          release_name: ${{ steps.get_latest_tag.outputs.latest_tag }}
           draft: false
           prerelease: false
 
