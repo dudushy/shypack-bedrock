@@ -30,7 +30,7 @@ jobs:
 
       - name: Get addons list
         id: get_addons
-        run: echo "addons=$(jq -c '.[]' addons.json)" >> $GITHUB_OUTPUT
+        run: echo "addons=$(cat addons.json)" >> $GITHUB_OUTPUT
 
       - name: Compile addons
         run: |
