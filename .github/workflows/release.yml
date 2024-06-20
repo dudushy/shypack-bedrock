@@ -30,13 +30,12 @@ jobs:
 
       - name: Get addons list
         id: get_addons
-        run: |
-          echo "addons=$(jq -c '.[]' addons.json)" >> $GITHUB_OUTPUT
+        run: echo "addons=$(jq -c '.[]' addons.json)" >> $GITHUB_OUTPUT
 
       - name: Compile addons
         run: |
           mkdir -p shypack
-          for addon in $(echo ${{ steps.get_addons.outputs.addons }} | jq -c '.[]'); do
+          for addon in $(echo '${{ steps.get_addons.outputs.addons }}' | jq -c '.[]'); do
             id=$(echo $addon | jq -r '.id')
             name=$(echo $addon | jq -r '.name')
             echo "Compiling $id"
@@ -54,11 +53,11 @@ jobs:
         id: generate_release_description
         run: |
           description="## This pack includes:\n"
-          for addon in $(echo ${{ steps.get_addons.outputs.addons }} | jq -c '.[]'); do
+          for addon in $(echo '${{ steps.get_addons.outputs.addons }}' | jq -c '.[]'); do
             name=$(echo $addon | jq -r '.name')
             description="${description}- ${name}\n"
           done
-          echo "description=$description" >> $GITHUB_OUTPUT
+          echo "description=${description}" >> $GITHUB_ENV
 
       - name: Create GitHub release
         id: create_release
@@ -68,7 +67,7 @@ jobs:
         with:
           tag_name: ${{ steps.get_latest_tag.outputs.latest_tag }}
           release_name: ${{ steps.get_latest_tag.outputs.latest_tag }}
-          body: ${{ steps.generate_release_description.outputs.description }}
+          body: ${{ env.description }}
           draft: false
           prerelease: false
 
