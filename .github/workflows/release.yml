@@ -1,6 +1,10 @@
 name: Release Addons
 
 on:
+  workflow_run:
+    workflows: ["Auto Tag"]
+    types:
+      - completed
   push:
     tags:
       - "v*"
@@ -12,6 +16,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Download artifact from Auto Tag workflow
+        uses: actions/download-artifact@v3
+        with:
+          name: tag_name
+          path: .
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -45,8 +55,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: $(cat tag_name.txt)
+          release_name: $(cat tag_name.txt)
           draft: false
           prerelease: false
 
