@@ -17,6 +17,7 @@ jobs:
 
       - name: Check for release keyword
         id: check_message
+        if: github.event_name == 'push'
         run: |
           commit_message=$(git log -1 --pretty=%B)
           echo "Commit message: $commit_message"
