@@ -23,9 +23,18 @@ fi
 sed -i.bak -E "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/" package.json
 rm package.json.bak
 
-# Update the version in package-lock.json (first two occurrences)
-sed -i.bak -E "0,/\"version\": \"$current_version\"/s//\"version\": \"$new_version\"/2" package-lock.json
-rm package-lock.json.bak
+# Update the version in package-lock.json (only the first two occurrences)
+counter=0
+while IFS= read -r line; do
+  if [[ $line =~ ^([[:space:]]*)\"version\":\ \"$current_version\" ]]; then
+    if [ $counter -lt 2 ]; then
+      leading_whitespace="${BASH_REMATCH[1]}"
+      line="${leading_whitespace}\"version\": \"$new_version\","
+      ((counter++))
+    fi
+  fi
+  echo "$line"
+done < package-lock.json > package-lock.json.tmp && mv package-lock.json.tmp package-lock.json
 
 # Commit the version bump
 git add package.json package-lock.json
