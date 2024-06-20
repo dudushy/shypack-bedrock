@@ -29,12 +29,14 @@ rm package-lock.json.bak
 
 # Commit the version bump
 git add package.json package-lock.json
-git commit -m "Bump version to $new_version [skip ci]"
+git commit -m "Bump version to $new_version"
 
 git push origin main
 
 # Create a new tag
 new_tag="v$new_version"
+
+# Create the new tag
 git tag $new_tag
 git push origin $new_tag
 
