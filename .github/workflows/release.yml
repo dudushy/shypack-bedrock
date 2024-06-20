@@ -31,13 +31,14 @@ jobs:
       - name: Get addons list
         id: get_addons
         run: |
-          addons=$(cat addons.json | jq -c '.')
-          echo "addons=${addons}" >> $GITHUB_OUTPUT
+          addons=$(jq -c '.' addons.json)
+          echo "addons=$addons" >> $GITHUB_OUTPUT
 
       - name: Compile addons
         run: |
           mkdir -p shypack
-          for addon in $(echo '${{ steps.get_addons.outputs.addons }}' | jq -c '.[]'); do
+          addons='${{ steps.get_addons.outputs.addons }}'
+          echo "$addons" | jq -c '.[]' | while read addon; do
             id=$(echo $addon | jq -r '.id')
             name=$(echo $addon | jq -r '.name')
             echo "Compiling $id"
@@ -55,7 +56,8 @@ jobs:
         id: generate_release_description
         run: |
           description="## This pack includes:\n"
-          for addon in $(echo '${{ steps.get_addons.outputs.addons }}' | jq -c '.[]'); do
+          addons='${{ steps.get_addons.outputs.addons }}'
+          echo "$addons" | jq -c '.[]' | while read addon; do
             name=$(echo $addon | jq -r '.name')
             description="${description}- ${name}\n"
           done
