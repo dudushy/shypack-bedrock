@@ -61,14 +61,17 @@ jobs:
             name=$(echo $addon | jq -r '.name')
             description="${description}- ${name}\n"
           done
-          echo "$description" > description.txt
+          printf "$description" > description.txt
 
       - name: Debug release description
         run: cat description.txt
 
       - name: Set release description
         run: |
-          echo "description=$(cat description.txt)" >> $GITHUB_ENV
+          description=$(cat description.txt)
+          echo "description<<EOF" >> $GITHUB_ENV
+          echo "$description" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Create GitHub release
         id: create_release
