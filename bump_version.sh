@@ -23,8 +23,8 @@ fi
 sed -i.bak -E "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/" package.json
 rm package.json.bak
 
-# Update the version in package-lock.json (top-level and within packages)
-sed -i.bak -E "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/g" package-lock.json
+# Update the version in package-lock.json (first two occurrences)
+sed -i.bak -E "0,/\"version\": \"$current_version\"/s//\"version\": \"$new_version\"/2" package-lock.json
 rm package-lock.json.bak
 
 # Commit the version bump

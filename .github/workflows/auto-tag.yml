@@ -47,13 +47,13 @@ jobs:
         id: get_tag
         run: echo "tag_name=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
+      - name: Create tag file
+        if: success()
+        run: echo "${{ steps.get_tag.outputs.tag_name }}" > tag_name.txt
+
       - name: Upload the tag name as artifact
         if: success()
         uses: actions/upload-artifact@v3
         with:
           name: tag_name
           path: tag_name.txt
-
-      - name: Create the tag file
-        if: success()
-        run: echo "${{ steps.get_tag.outputs.tag_name }}" > tag_name.txt
