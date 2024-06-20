@@ -57,11 +57,8 @@ jobs:
         run: |
           description="## This pack includes:\n"
           addons='${{ steps.get_addons.outputs.addons }}'
-          echo "$addons" | jq -c '.[]' | while read addon; do
-            name=$(echo $addon | jq -r '.name')
-            description="${description}- ${name}\n"
-          done
-          printf "$description" > description.txt
+          description=$(echo "$addons" | jq -r '.[] | "- \(.name)"' | sed 's/^/  /')
+          printf "## This pack includes:\n$description" > description.txt
 
       - name: Debug release description
         run: cat description.txt
