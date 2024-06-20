@@ -1,3 +1,6 @@
-{
-  "addons": ["one_player_sleep"]
-}
+[
+  {
+    "id": "one_player_sleep",
+    "name": "One Player Sleep"
+  }
+]
