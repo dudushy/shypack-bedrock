@@ -1,0 +1,25 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "§i§l[§u§lSHY§i§l] §aStats§r",
+    "description": "§i§l[§s§lBP§i§l] §r§aAdd some stats to track your progress.§r",
+    "uuid": "a1dab327-3c93-4db4-b272-a6cc8832314a",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 30]
+  },
+  "modules": [
+    {
+      "language": "javascript",
+      "type": "script",
+      "uuid": "29c1db41-a8df-4ee0-be82-86a53c78678e",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.8.0"
+    }
+  ]
+}
