@@ -2,5 +2,9 @@
   {
     "id": "one_player_sleep",
     "name": "One Player Sleep"
+  },
+  {
+    "id": "stats",
+    "name": "Stats"
   }
 ]
