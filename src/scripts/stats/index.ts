@@ -12,7 +12,7 @@ const START_TICK = 100;
 
 let currentTick = 0;
 
-const test = world.scoreboard.getObjective("hours_played") || world.scoreboard.addObjective("hours_played", "Hours Played");
+const hours_played = world.scoreboard.getObjective("hours_played") || world.scoreboard.addObjective("hours_played", "Hours Played");
 
 function gameTick() {
   try {
@@ -20,10 +20,10 @@ function gameTick() {
 
     if (currentTick === START_TICK) {
       world.sendMessage(`${COLOR}${TITLE} Script Loaded!`);
-      setSidebar(test);
+      setSidebar(hours_played);
     }
 
-    incrementObjective(test);
+    incrementObjective(hours_played);
   } catch (e) {
     console.warn("Tick error: " + e);
   }
