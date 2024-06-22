@@ -19,7 +19,7 @@ function gameTick() {
 
       world.gameRules.playersSleepingPercentage = 0;
 
-      world.sendMessage(`[@] ${COLOR}playersSleepingPercentage§r: ` + world.gameRules.playersSleepingPercentage);
+      // world.sendMessage(`[@] ${COLOR}playersSleepingPercentage§r: ` + world.gameRules.playersSleepingPercentage);
     }
   } catch (e) {
     console.warn("Tick error: " + e);
