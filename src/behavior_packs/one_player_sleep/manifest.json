@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "§f§l[§5§lSHY§f§l] §9One Player Sleep§r",
-    "description": "§f§l[§b§lBP§f§l] §r§9Allows one player to sleep and skip the night.§r",
+    "name": "§i§l[§u§lSHY§i§l] §9One Player Sleep§r",
+    "description": "§i§l[§s§lBP§i§l] §r§9Allows one player to sleep and skip the night.§r",
     "uuid": "57cef75e-54f3-4621-a5b5-81161b705dbd",
     "version": [1, 0, 0],
     "min_engine_version": [1, 20, 30]

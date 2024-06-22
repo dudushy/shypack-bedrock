@@ -1,8 +1,8 @@
 {
   "format_version": 2,
   "header": {
-    "name": "§f§l[§5§lSHY§f§l] §cTest Pack",
-    "description": "§f§l[§a§lRP§f§l] §r§cThis is a test!",
+    "name": "§i§l[§u§lSHY§i§l] §cTest Pack",
+    "description": "§i§l[§q§lRP§i§l] §r§cThis is a test!",
     "uuid": "9d9cf63f-7904-4202-91e1-f11591c24c39",
     "version": [1, 0, 0],
     "min_engine_version": [1, 20, 30]
