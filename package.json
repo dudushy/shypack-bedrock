@@ -13,8 +13,7 @@
   },
   "scripts": {
     "start": "just-scripts local-deploy --watch",
-    "bump": "bash ./bump_version.sh",
-    "local-deploy": "just-scripts local-deploy",
+    "deploy": "just-scripts local-deploy",
     "mcaddon": "just-scripts mcaddon",
     "lint": "just-scripts lint",
     "build": "just-scripts build",
