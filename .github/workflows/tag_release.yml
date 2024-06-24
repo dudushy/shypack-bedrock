@@ -29,11 +29,11 @@ jobs:
 
   generate_tag:
     name: Generate Tag
-    needs: check_keyword
-    if: needs.check_keyword.outputs.skip == 'false'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    needs: [check_keyword]
+    if: needs.check_keyword.outputs.skip == 'false'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -58,10 +58,11 @@ jobs:
 
   generate_release:
     name: Generate Release
-    needs: generate_tag
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    needs: [generate_tag]
+    if: needs.check_keyword.outputs.skip == 'false'
     steps:
       - name: Checkout repository (release)
         uses: actions/checkout@v3
