@@ -7,6 +7,7 @@ on:
 
 jobs:
   check_keyword:
+    name: Check for release keyword (--release)
     runs-on: ubuntu-latest
     outputs:
       skip: ${{ steps.check_message.outputs.skip }}
@@ -26,7 +27,8 @@ jobs:
             echo "Commit message contains '--release'. Proceeding."
             echo "skip=false" >> $GITHUB_OUTPUT
 
-  create_tag_and_release:
+  generate_tag:
+    name: Generate Tag
     needs: check_keyword
     if: needs.check_keyword.outputs.skip == 'false'
     runs-on: ubuntu-latest
@@ -49,10 +51,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Release job
-        run: |
-          echo "Proceeding with the release steps."
-
+  generate_release:
+    name: Generate Release
+    needs: check_keyword
+    if: needs.check_keyword.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
       - name: Checkout repository (release)
         uses: actions/checkout@v3
 
