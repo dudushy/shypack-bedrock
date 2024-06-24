@@ -47,14 +47,18 @@ jobs:
         run: chmod +x bump_version.sh
 
       - name: Bump version and create tag
+        id: bump_version
         run: ./bump_version.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get new tag
+        id: get_new_tag
+        run: echo "new_tag=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
+
   generate_release:
     name: Generate Release
-    needs: check_keyword
-    if: needs.check_keyword.outputs.skip == 'false'
+    needs: generate_tag
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -117,7 +121,7 @@ jobs:
           echo "$description" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Create GitHub release
+      - name: Create or Update GitHub release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -128,6 +132,7 @@ jobs:
           body: ${{ env.description }}
           draft: false
           prerelease: false
+          overwrite: true
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
