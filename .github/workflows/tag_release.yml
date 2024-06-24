@@ -26,13 +26,15 @@ jobs:
           else
             echo "Commit message contains '--release'. Proceeding."
             echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+          exit 0
 
   generate_tag:
     name: Generate Tag
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [check_keyword]
+    needs: check_keyword
     if: needs.check_keyword.outputs.skip == 'false'
     steps:
       - name: Checkout repository
@@ -61,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: [generate_tag]
+    needs: generate_tag
     if: needs.check_keyword.outputs.skip == 'false'
     steps:
       - name: Checkout repository (release)
