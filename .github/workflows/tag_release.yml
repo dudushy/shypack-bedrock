@@ -1,18 +1,59 @@
-name: Release Addons
+name: Generate Tag and Release
 
 on:
-  workflow_run:
-    workflows: ["Auto Tag"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
-  release:
+  check_keyword:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.check_message.outputs.skip }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check for release keyword
+        id: check_message
+        run: |
+          commit_message=$(git log -1 --pretty=%B)
+          echo "Commit message: $commit_message"
+          if [[ "$commit_message" != *"--release"* ]]; then
+            echo "Commit message does not contain '--release'. Exiting."
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "Commit message contains '--release'. Proceeding."
+            echo "skip=false" >> $GITHUB_OUTPUT
+
+  create_tag_and_release:
+    needs: check_keyword
+    if: needs.check_keyword.outputs.skip == 'false'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Set execute permission on bump_version.sh
+        run: chmod +x bump_version.sh
+
+      - name: Bump version and create tag
+        run: ./bump_version.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Release job
+        run: |
+          echo "Proceeding with the release steps."
+
+      - name: Checkout repository (release)
         uses: actions/checkout@v3
 
       - name: Fetch tags
