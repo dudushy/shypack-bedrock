@@ -3,12 +3,16 @@ import {
   system
 } from "@minecraft/server";
 
+const DEBUG = true;
+
 const COLOR = "§9";
 const TITLE = "One Player Sleep§r";
 
 const START_TICK = 100;
 
-let currentTick = 0;
+var currentTick = 0;
+
+system.run(gameTick);
 
 function gameTick() {
   try {
@@ -19,7 +23,7 @@ function gameTick() {
 
       world.gameRules.playersSleepingPercentage = 0;
 
-      // world.sendMessage(`[@] ${COLOR}playersSleepingPercentage§r: ` + world.gameRules.playersSleepingPercentage);
+      if (DEBUG) world.sendMessage(`${COLOR}playersSleepingPercentage§r: ` + world.gameRules.playersSleepingPercentage);
     }
   } catch (e) {
     console.warn("Tick error: " + e);
@@ -27,5 +31,3 @@ function gameTick() {
 
   system.run(gameTick);
 }
-
-system.run(gameTick);
