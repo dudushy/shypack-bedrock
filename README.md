@@ -16,7 +16,8 @@
     ```bash
     npm ci
     ```
-3. Run project:
+3. Select the addon you want to build then rename the `PROJECT_NAME` in the `.env` file
+4. Run project:
     ```bash
     npm start
     ```
