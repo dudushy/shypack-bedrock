@@ -121,14 +121,14 @@ jobs:
           previous_tag=${{ steps.get_previous_tag.outputs.previous_tag }}
           repo_url=https://github.com/dudushy/shypack-bedrock
           if [[ "$previous_tag" == "none" ]]; then
-            changelog_url="This is the first release."
+            changelog="> This is the first release."
           else
-            changelog_url="$repo_url/compare/$previous_tag...$latest_tag"
+            changelog="> [Full Changelog]($repo_url/compare/$previous_tag...$latest_tag)"
           fi
           description="## This pack includes:\n"
           addons='${{ steps.get_addons.outputs.addons }}'
           addon_list=$(echo "$addons" | jq -r '.[] | "- \(.name)"' | sed 's/^/  /')
-          full_description="$description\n$addon_list\n\n[Full Changelog]($changelog_url)"
+          full_description="$description\n$addon_list\n\n$changelog_url"
           echo -e "$full_description" > description.txt
 
       - name: Debug release description
