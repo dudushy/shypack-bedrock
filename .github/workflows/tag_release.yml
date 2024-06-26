@@ -119,7 +119,7 @@ jobs:
         run: |
           latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
           previous_tag=${{ steps.get_previous_tag.outputs.previous_tag }}
-          repo_url=https://github.com/<your-username>/<your-repo> # Replace with your actual repository URL
+          repo_url=https://github.com/dudushy/shypack-bedrock
           if [[ "$previous_tag" == "none" ]]; then
             changelog_url="This is the first release."
           else
