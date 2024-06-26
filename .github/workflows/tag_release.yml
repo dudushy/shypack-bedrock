@@ -76,8 +76,16 @@ jobs:
         id: get_latest_tag
         run: echo "latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
 
-      - name: Debug latest tag
-        run: echo "Latest tag is ${{ steps.get_latest_tag.outputs.latest_tag }}"
+      - name: Get previous tag
+        id: get_previous_tag
+        run: |
+          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1))
+          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+
+      - name: Debug latest and previous tag
+        run: |
+          echo "Latest tag is ${{ steps.get_latest_tag.outputs.latest_tag }}"
+          echo "Previous tag is ${{ steps.get_previous_tag.outputs.previous_tag }}"
 
       - name: Install dependencies
         run: npm install
@@ -109,10 +117,15 @@ jobs:
       - name: Generate release description
         id: generate_release_description
         run: |
+          latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
+          previous_tag=${{ steps.get_previous_tag.outputs.previous_tag }}
+          repo_url=https://github.com/dudushy/shypack-bedrock
+          changelog_url="$repo_url/compare/$previous_tag...$latest_tag"
           description="## This pack includes:\n"
           addons='${{ steps.get_addons.outputs.addons }}'
-          description=$(echo "$addons" | jq -r '.[] | "- \(.name)"' | sed 's/^/  /')
-          printf "## This pack includes:\n$description" > description.txt
+          addon_list=$(echo "$addons" | jq -r '.[] | "- \(.name)"' | sed 's/^/  /')
+          full_description="$description\n$addon_list\n\n[Full Changelog]($changelog_url)"
+          echo -e "$full_description" > description.txt
 
       - name: Debug release description
         run: cat description.txt
