@@ -8,7 +8,8 @@ import {
   Player
 } from "@minecraft/server";
 
-const DEBUG = true;
+// const DEBUG = true;
+const DEBUG = false;
 
 const COLOR = "§a";
 const TITLE = "Stats§r";
@@ -20,7 +21,7 @@ var currentTick = 0;
 const SECOND = 20;
 const MINUTE = 20 * 60;
 const HOUR = MINUTE * 60;
-const SIDEBAR_TIMEOUT = SECOND * 10;
+const SIDEBAR_TIMEOUT = SECOND * 30;
 
 const debug = world.scoreboard.getObjective("debug") || world.scoreboard.addObjective("debug");
 const ticks = world.scoreboard.getObjective("ticks") || world.scoreboard.addObjective("ticks");
@@ -29,28 +30,43 @@ const deaths = world.scoreboard.getObjective("deaths") || world.scoreboard.addOb
 const blocks_broken = world.scoreboard.getObjective("blocks_broken") || world.scoreboard.addObjective("blocks_broken", "Blocks Broken");
 const blocks_placed = world.scoreboard.getObjective("blocks_placed") || world.scoreboard.addObjective("blocks_placed", "Blocks Placed");
 const items_used = world.scoreboard.getObjective("items_used") || world.scoreboard.addObjective("items_used", "Items Used");
+const kills = world.scoreboard.getObjective("kills") || world.scoreboard.addObjective("kills", "Kills");
+const current_level = world.scoreboard.getObjective("current_level") || world.scoreboard.addObjective("current_level", "Current Level");
+const max_level = world.scoreboard.getObjective("max_level") || world.scoreboard.addObjective("max_level", "Max Level");
+const pearls_used = world.scoreboard.getObjective("pearls_used") || world.scoreboard.addObjective("pearls_used", "Pearls Used");
 
 const sidebarObjectiveArray = [
-  debug,
-  ticks,
+  // debug,
+  // ticks,
   hours_played,
   deaths,
   blocks_broken,
   blocks_placed,
-  items_used,
+  // items_used,
+  kills,
+  current_level,
+  max_level,
+  pearls_used
 ];
 
 system.run(gameTick);
 
 world.afterEvents.entityDie.subscribe((event) => {
-  if (event.deadEntity.typeId != 'minecraft:player') return;
+  if (event.deadEntity.typeId != 'minecraft:player') {
+    const player = event.damageSource.damagingEntity as Player;
 
-  const player = event.deadEntity as Player;
+    const score = kills.getScore(player) || 0;
+    kills.setScore(player, score + 1);
 
-  const score = deaths.getScore(player) || 0;
-  deaths.setScore(player, score + 1);
+    if (DEBUG) world.sendMessage(`${player.name} ${COLOR}killed §r${event.deadEntity.typeId}${COLOR}!`);
+  } else {
+    const player = event.deadEntity as Player;
 
-  if (DEBUG) world.sendMessage(`${player.name} ${COLOR}died!`);
+    const score = deaths.getScore(player) || 0;
+    deaths.setScore(player, score + 1);
+
+    if (DEBUG) world.sendMessage(`${player.name} ${COLOR}died!`);
+  }
 });
 
 world.afterEvents.playerBreakBlock.subscribe((event: PlayerBreakBlockAfterEvent) => {
@@ -77,7 +93,14 @@ world.afterEvents.itemUse.subscribe((event) => {
   const score = items_used.getScore(player) || 0;
   items_used.setScore(player, score + 1);
 
-  if (DEBUG) world.sendMessage(`${player.name} ${COLOR}used §r${event.itemStack.type.id} ${COLOR}| §r${event.itemStack.typeId}`);
+  if (event.itemStack.type.id === 'minecraft:ender_pearl') {
+    const score = pearls_used.getScore(player) || 0;
+    pearls_used.setScore(player, score + 1);
+  }
+
+  if (DEBUG) world.sendMessage(`${player.name} ${COLOR}used §r${event.itemStack.type.id}`);
+
+  if (DEBUG) cycleSidebar();
 });
 
 function gameTick() {
@@ -96,9 +119,10 @@ function gameTick() {
       debug.setScore('sidebard_index', 0);
     }
 
-    cycleSidebar();
+    if (currentTick % SIDEBAR_TIMEOUT === 0) cycleSidebar();
 
     incrementTicks();
+    checkLevelUp();
   } catch (e) {
     console.warn("Tick error: " + e);
   }
@@ -134,12 +158,27 @@ function incrementTicks() {
 }
 
 function cycleSidebar() {
-  if (currentTick % SIDEBAR_TIMEOUT === 0) {
-    const currentSidebarIndex = ((debug.getScore('sidebard_index') || 0) + 1) % sidebarObjectiveArray.length;
+  const currentSidebarIndex = ((debug.getScore('sidebard_index') || 0) + 1) % sidebarObjectiveArray.length;
 
-    if (DEBUG) world.sendMessage(`${COLOR}currentSidebarIndex: §r${currentSidebarIndex}`);
+  if (DEBUG) world.sendMessage(`${COLOR}currentSidebarIndex: §r${currentSidebarIndex}`);
 
-    setSidebar(sidebarObjectiveArray[currentSidebarIndex]);
-    debug.setScore('sidebard_index', currentSidebarIndex);
+  setSidebar(sidebarObjectiveArray[currentSidebarIndex]);
+  debug.setScore('sidebard_index', currentSidebarIndex);
+}
+
+function checkLevelUp() {
+  const players = world.getAllPlayers();
+
+  for (const player of players) {
+    const currentLevel = player.level;
+    const maxLevel = max_level.getScore(player) || 0;
+
+    if (currentLevel > maxLevel) {
+      max_level.setScore(player, currentLevel);
+
+      if (DEBUG) world.sendMessage(`${COLOR}${player.name} has reached level §r${currentLevel}!`);
+    }
+
+    current_level.setScore(player, currentLevel);
   }
 }
