@@ -8,8 +8,8 @@ import {
   Player
 } from "@minecraft/server";
 
-// const DEBUG = true;
-const DEBUG = false;
+const DEBUG = true;
+// const DEBUG = false;
 
 const COLOR = "§a";
 const TITLE = "Stats§r";
