@@ -26,7 +26,7 @@ function gameTick() {
       if (DEBUG) world.sendMessage(`${COLOR}playersSleepingPercentage§r: ` + world.gameRules.playersSleepingPercentage);
     }
   } catch (e) {
-    console.warn("Tick error: " + e);
+    world.sendMessage(`${COLOR}Tick error: §r` + e);
   }
 
   system.run(gameTick);

@@ -11,6 +11,10 @@ import {
 const DEBUG = true;
 // const DEBUG = false;
 
+const DEBUG_NUMBER = "0";
+// const DEBUG_NUMBER = parseInt(localStorage.getItem("DEBUG_NUMBER") || "0");
+// localStorage.setItem("DEBUG_NUMBER", `${DEBUG_NUMBER} + 1`);
+
 const COLOR = "§a";
 const TITLE = "Stats§r";
 
@@ -108,7 +112,7 @@ function gameTick() {
     currentTick++;
 
     if (currentTick === START_TICK) {
-      world.sendMessage(`${COLOR}${TITLE} Script Loaded!`);
+      world.sendMessage(`${COLOR}${TITLE} Script Loaded!` + (DEBUG ? ` §r§l§b${DEBUG_NUMBER}` : ""));
 
       if (DEBUG) world.sendMessage(`${COLOR}SIDEBAR_TIMEOUT: §r${SIDEBAR_TIMEOUT}`);
       if (DEBUG) world.sendMessage(`${COLOR}sidebarObjectiveArray: §r(${sidebarObjectiveArray.length}) ${sidebarObjectiveArray.map(obj => obj.displayName).join(', ')}`);
@@ -124,7 +128,7 @@ function gameTick() {
     incrementTicks();
     checkLevelUp();
   } catch (e) {
-    console.warn("Tick error: " + e);
+    world.sendMessage(`${COLOR}Tick error: §r` + e);
   }
 
   system.run(gameTick);
