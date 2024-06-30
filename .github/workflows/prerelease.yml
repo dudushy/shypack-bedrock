@@ -1,4 +1,4 @@
-name: Generate rerelease
+name: Generate Prerelease
 
 on:
   push:
