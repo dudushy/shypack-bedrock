@@ -128,7 +128,6 @@ jobs:
           body: ${{ env.description }}
           draft: false
           prerelease: true
-          overwrite: true
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
