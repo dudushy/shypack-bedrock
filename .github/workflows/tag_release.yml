@@ -42,6 +42,8 @@ jobs:
     permissions:
       contents: write
     needs: check_package_version
+    outputs:
+      new_tag: ${{ steps.create_tag.outputs.new_tag }}
     if: needs.check_package_version.outputs.current_version != needs.check_package_version.outputs.previous_version
     steps:
       - name: Checkout repository
@@ -66,7 +68,7 @@ jobs:
     permissions:
       contents: write
     needs: generate_tag
-    if: needs.generate_tag.outputs.new_tag != ''
+    if: needs.generate_tag.outputs.new_tag != 'none'
     steps:
       - name: Checkout repository (release)
         uses: actions/checkout@v3
@@ -130,7 +132,7 @@ jobs:
           description="## This pack includes:\n"
           addons='${{ steps.get_addons.outputs.addons }}'
           addon_list=$(echo "$addons" | jq -r '.[] | "- \(.name)"' | sed 's/^/  /')
-          full_description="$description\n$addon_list\n\n$changelog_url"
+          full_description="$description\n$addon_list\n\n$changelog"
           echo -e "$full_description" > description.txt
 
       - name: Debug release description
