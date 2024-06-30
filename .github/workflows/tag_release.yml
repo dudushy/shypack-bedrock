@@ -6,36 +6,42 @@ on:
       - main
 
 jobs:
-  check_keyword:
-    name: Check for release keyword (--release)
+  check_package_version:
+    name: Check package.json version
     runs-on: ubuntu-latest
     outputs:
-      skip: ${{ steps.check_message.outputs.skip }}
+      current_version: ${{ steps.current_version.outputs.current_version }}
+      previous_version: ${{ steps.previous_version.outputs.previous_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Check for release keyword
-        id: check_message
+      - name: Get current package version
+        id: current_version
         run: |
-          commit_message=$(git log -1 --pretty=%B)
-          echo "Commit message: $commit_message"
-          if [[ "$commit_message" != *"--release"* ]]; then
-            echo "Commit message does not contain '--release'. Exiting."
-            echo "skip=true" >> $GITHUB_OUTPUT
+          current_version=$(jq -r '.version' package.json)
+          echo "current_version=v$current_version" >> $GITHUB_OUTPUT
+
+      - name: Get previous package version
+        id: previous_version
+        run: |
+          git fetch --tags
+          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1` 2>/dev/null || echo "none")
+          if [ "$latest_tag" != "none" ]; then
+            previous_version=$(git show "$latest_tag:package.json" | jq -r '.version')
+            previous_version="v$previous_version"
           else
-            echo "Commit message contains '--release'. Proceeding."
-            echo "skip=false" >> $GITHUB_OUTPUT
+            previous_version="none"
           fi
-          exit 0
+          echo "previous_version=$previous_version" >> $GITHUB_OUTPUT
 
   generate_tag:
     name: Generate Tag
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: check_keyword
-    if: needs.check_keyword.outputs.skip == 'false'
+    needs: check_package_version
+    if: needs.check_package_version.outputs.current_version != needs.check_package_version.outputs.previous_version
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -45,18 +51,13 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Set execute permission on bump_version.sh
-        run: chmod +x bump_version.sh
-
-      - name: Bump version and create tag
-        id: bump_version
-        run: ./bump_version.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get new tag
-        id: get_new_tag
-        run: echo "new_tag=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
+      - name: Create new tag
+        id: create_tag
+        run: |
+          new_tag="${{ needs.check_package_version.outputs.current_version }}"
+          git tag "$new_tag"
+          git push origin "$new_tag"
+          echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
 
   generate_release:
     name: Generate Release
@@ -64,7 +65,7 @@ jobs:
     permissions:
       contents: write
     needs: generate_tag
-    if: needs.check_keyword.outputs.skip == 'false'
+    if: needs.generate_tag.outputs.new_tag
     steps:
       - name: Checkout repository (release)
         uses: actions/checkout@v3
