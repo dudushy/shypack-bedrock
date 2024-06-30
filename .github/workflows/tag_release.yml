@@ -65,7 +65,7 @@ jobs:
     permissions:
       contents: write
     needs: generate_tag
-    if: needs.generate_tag.outputs.new_tag
+    if: needs.generate_tag.outputs.new_tag != ''
     steps:
       - name: Checkout repository (release)
         uses: actions/checkout@v3
