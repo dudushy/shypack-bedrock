@@ -1,0 +1,70 @@
+name: Preview
+
+on:
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Get addons list
+        id: get_addons
+        run: |
+          addons=$(jq -c '.' addons.json)
+          echo "addons=$addons" >> $GITHUB_OUTPUT
+
+      - name: Compile addons
+        run: |
+          mkdir -p shypack
+          addons='${{ steps.get_addons.outputs.addons }}'
+          echo "$addons" | jq -c '.[]' | while read addon; do
+            id=$(echo $addon | jq -r '.id')
+            name=$(echo $addon | jq -r '.name')
+            echo "Compiling $id"
+            echo "PROJECT_NAME=$id" > .env
+            npm run mcaddon
+            mkdir -p ./shypack/$id
+            cp -r ./dist/packages/* ./shypack/$id/
+          done
+
+      - name: Zip shypack
+        run: |
+          zip -r shypack.zip shypack
+
+      - name: Get branch name
+        id: get_branch
+        run: echo "branch-name=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+
+      - name: Checkout preview branch and clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
+          if git show-ref --verify --quiet refs/heads/preview; then
+            git checkout preview
+            git reset --hard
+            git rm -rf .
+            git clean -fdx
+            git commit --allow-empty -m "Clean preview branch"
+          else
+            git checkout --orphan preview
+            git reset --hard
+          fi
+
+      - name: Push builds to preview branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH_NAME: ${{ env.branch-name }}
+        run: |
+          git add ./shypack.zip
+          git commit -m "Add preview builds from \`$BRANCH_NAME\`"
+          git push origin preview --force
