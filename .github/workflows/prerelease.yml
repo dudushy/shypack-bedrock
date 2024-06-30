@@ -3,39 +3,9 @@ name: Generate Prerelease
 on:
   push:
     tags:
-      - "*"
+      - "*-*"
 
 jobs:
-  check_prelease:
-    name: Check Prelease
-    runs-on: ubuntu-latest
-    outputs:
-      is_prerelease: ${{ steps.check_prerelease.outputs.is_prerelease }}
-    steps:
-      - name: Checkout repository (prerelease)
-        uses: actions/checkout@v3
-
-      - name: Get latest tag
-        id: get_latest_tag
-        run: echo "latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
-
-      - name: Get previous tag
-        id: get_previous_tag
-        run: |
-          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "none")
-          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
-
-      - name: Check if latest tag is a prerelease
-        id: check_prerelease
-        run: |
-          latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
-          if [[ $latest_tag == *"-"* ]]; then
-            is_prerelease=true
-          else
-            is_prerelease=false
-          fi
-          echo "is_prerelease=$is_prerelease" >> $GITHUB_OUTPUT
-
   generate_prerelease:
     name: Generate Prerelease
     runs-on: ubuntu-latest
