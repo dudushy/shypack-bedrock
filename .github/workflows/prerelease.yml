@@ -1,0 +1,141 @@
+name: Generate rerelease
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  check_prelease:
+    name: Check Prelease
+    runs-on: ubuntu-latest
+    outputs:
+      is_prerelease: ${{ steps.check_prerelease.outputs.is_prerelease }}
+    steps:
+      - name: Checkout repository (prerelease)
+        uses: actions/checkout@v3
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: echo "latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
+
+      - name: Get previous tag
+        id: get_previous_tag
+        run: |
+          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "none")
+          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+
+      - name: Check if latest tag is a prerelease
+        id: check_prerelease
+        run: |
+          latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
+          if [[ $latest_tag == *"-"* ]]; then
+            is_prerelease=true
+          else
+            is_prerelease=false
+          fi
+          echo "is_prerelease=$is_prerelease" >> $GITHUB_OUTPUT
+
+  generate_prerelease:
+    name: Generate Prerelease
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository (release)
+        uses: actions/checkout@v3
+
+      - name: Fetch tags
+        run: git fetch --tags
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: echo "latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_OUTPUT
+
+      - name: Get previous tag
+        id: get_previous_tag
+        run: |
+          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "none")
+          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+
+      - name: Debug latest and previous tag
+        run: |
+          echo "Latest tag is ${{ steps.get_latest_tag.outputs.latest_tag }}"
+          echo "Previous tag is ${{ steps.get_previous_tag.outputs.previous_tag }}"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Get addons list
+        id: get_addons
+        run: |
+          addons=$(jq -c '.' addons.json)
+          echo "addons=$addons" >> $GITHUB_OUTPUT
+
+      - name: Compile addons
+        run: |
+          mkdir -p shypack
+          addons='${{ steps.get_addons.outputs.addons }}'
+          echo "$addons" | jq -c '.[]' | while read addon; do
+            id=$(echo $addon | jq -r '.id')
+            name=$(echo $addon | jq -r '.name')
+            echo "Compiling $id"
+            echo "PROJECT_NAME=$id" > .env
+            npm run mcaddon
+            mkdir -p ./shypack/$id
+            cp -r ./dist/packages/* ./shypack/$id/
+          done
+
+      - name: Zip shypack
+        run: |
+          zip -r shypack.zip shypack
+
+      - name: Generate release description
+        id: generate_release_description
+        run: |
+          latest_tag=${{ steps.get_latest_tag.outputs.latest_tag }}
+          previous_tag=${{ steps.get_previous_tag.outputs.previous_tag }}
+          repo_url=https://github.com/dudushy/shypack-bedrock
+          if [[ "$previous_tag" == "none" ]]; then
+            changelog="> This is the first release."
+          else
+            changelog="> [Full Changelog]($repo_url/compare/$previous_tag...$latest_tag)"
+          fi
+          description="## This pack includes:\n"
+          addons='${{ steps.get_addons.outputs.addons }}'
+          addon_list=$(echo "$addons" | jq -r '.[] | "- \(.name)"' | sed 's/^/  /')
+          full_description="$description\n$addon_list\n\n$changelog"
+          echo -e "$full_description" > description.txt
+
+      - name: Debug release description
+        run: cat description.txt
+
+      - name: Set release description
+        run: |
+          description=$(cat description.txt)
+          echo "description<<EOF" >> $GITHUB_ENV
+          echo "$description" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create or Update GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_latest_tag.outputs.latest_tag }}
+          release_name: ${{ steps.get_latest_tag.outputs.latest_tag }}
+          body: ${{ env.description }}
+          draft: false
+          prerelease: true
+          overwrite: true
+
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./shypack.zip
+          asset_name: shypack.zip
+          asset_content_type: application/zip
