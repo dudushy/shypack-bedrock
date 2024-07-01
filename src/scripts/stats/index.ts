@@ -9,11 +9,8 @@ import {
 } from "@minecraft/server";
 
 const DEBUG = true;
-// const DEBUG = false;
 
 const DEBUG_NUMBER = "0";
-// const DEBUG_NUMBER = parseInt(localStorage.getItem("DEBUG_NUMBER") || "0");
-// localStorage.setItem("DEBUG_NUMBER", `${DEBUG_NUMBER} + 1`);
 
 const COLOR = "§a";
 const COLOR_ERROR = "§c";
@@ -43,8 +40,8 @@ var pearls_used: ScoreboardObjective;
 var sidebarObjectiveArray: any[] = [];
 
 function initializeScoreboards() {
-  debug = world.scoreboard.getObjective("debug") || world.scoreboard.addObjective("debug");
-  ticks = world.scoreboard.getObjective("ticks") || world.scoreboard.addObjective("ticks");
+  debug = world.scoreboard.getObjective("debug") || world.scoreboard.addObjective("debug", "Debug");
+  ticks = world.scoreboard.getObjective("ticks") || world.scoreboard.addObjective("ticks", "Ticks");
   hours_played = world.scoreboard.getObjective("hours_played") || world.scoreboard.addObjective("hours_played", "Hours Played");
   deaths = world.scoreboard.getObjective("deaths") || world.scoreboard.addObjective("deaths", "Deaths");
   blocks_broken = world.scoreboard.getObjective("blocks_broken") || world.scoreboard.addObjective("blocks_broken", "Blocks Broken");
@@ -56,19 +53,22 @@ function initializeScoreboards() {
   pearls_used = world.scoreboard.getObjective("pearls_used") || world.scoreboard.addObjective("pearls_used", "Pearls Used");
 
   sidebarObjectiveArray = [
-    // debug,
-    // ticks,
+    debug,
+    ticks,
     hours_played,
     deaths,
     blocks_broken,
     blocks_placed,
-    // items_used,
+    items_used,
     kills,
     current_level,
     max_level,
     pearls_used
   ];
 }
+
+// Ensure initializeScoreboards is called at the start
+initializeScoreboards();
 
 system.run(gameTick);
 
