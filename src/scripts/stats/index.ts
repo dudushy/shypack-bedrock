@@ -16,6 +16,7 @@ const DEBUG_NUMBER = "0";
 // localStorage.setItem("DEBUG_NUMBER", `${DEBUG_NUMBER} + 1`);
 
 const COLOR = "§a";
+const COLOR_ERROR = "§c";
 const TITLE = "Stats§r";
 
 const START_TICK = 100;
@@ -56,55 +57,71 @@ const sidebarObjectiveArray = [
 system.run(gameTick);
 
 world.afterEvents.entityDie.subscribe((event) => {
-  if (event.deadEntity.typeId != 'minecraft:player') {
-    const player = event.damageSource.damagingEntity as Player;
+  try {
+    if (event.deadEntity.typeId != 'minecraft:player') {
+      const player = event.damageSource.damagingEntity as Player;
 
-    const score = kills.getScore(player) || 0;
-    kills.setScore(player, score + 1);
+      const score = kills.getScore(player) || 0;
+      kills.setScore(player, score + 1);
 
-    if (DEBUG) world.sendMessage(`${player.name} ${COLOR}killed §r${event.deadEntity.typeId}${COLOR}!`);
-  } else {
-    const player = event.deadEntity as Player;
+      if (DEBUG) world.sendMessage(`[entityDie] ${player.name} ${COLOR}killed §r${event.deadEntity.typeId}${COLOR}!`);
+    } else {
+      const player = event.deadEntity as Player;
 
-    const score = deaths.getScore(player) || 0;
-    deaths.setScore(player, score + 1);
+      const score = deaths.getScore(player) || 0;
+      deaths.setScore(player, score + 1);
 
-    if (DEBUG) world.sendMessage(`${player.name} ${COLOR}died!`);
+      if (DEBUG) world.sendMessage(`[entityDie] ${player.name} ${COLOR}died!`);
+    }
+  } catch (error) {
+    world.sendMessage(`${COLOR}[entityDie] ${COLOR_ERROR}Error: §r` + error);
   }
 });
 
 world.afterEvents.playerBreakBlock.subscribe((event: PlayerBreakBlockAfterEvent) => {
-  const player = event.player;
+  try {
+    const player = event.player;
 
-  const score = blocks_broken.getScore(player) || 0;
-  blocks_broken.setScore(player, score + 1);
+    const score = blocks_broken.getScore(player) || 0;
+    blocks_broken.setScore(player, score + 1);
 
-  if (DEBUG) world.sendMessage(`${player.name} ${COLOR}broke §r${event.brokenBlockPermutation.type.id}`);
+    if (DEBUG) world.sendMessage(`[playerBreakBlock] ${player.name} ${COLOR}broke §r${event.brokenBlockPermutation.type.id}`);
+  } catch (error) {
+    world.sendMessage(`${COLOR}[playerBreakBlock] ${COLOR_ERROR}Error: §r` + error);
+  }
 });
 
 world.afterEvents.playerPlaceBlock.subscribe((event: PlayerPlaceBlockAfterEvent) => {
-  const player = event.player;
+  try {
+    const player = event.player;
 
-  const score = blocks_placed.getScore(player) || 0;
-  blocks_placed.setScore(player, score + 1);
+    const score = blocks_placed.getScore(player) || 0;
+    blocks_placed.setScore(player, score + 1);
 
-  if (DEBUG) world.sendMessage(`${player.name} ${COLOR}placed §r${event.block.type.id}`);
+    if (DEBUG) world.sendMessage(`[playerPlaceBlock] ${player.name} ${COLOR}placed §r${event.block.type.id}`);
+  } catch (error) {
+    world.sendMessage(`${COLOR}[playerPlaceBlock] ${COLOR_ERROR}Error: §r` + error);
+  }
 });
 
 world.afterEvents.itemUse.subscribe((event) => {
-  const player = event.source;
+  try {
+    const player = event.source;
 
-  const score = items_used.getScore(player) || 0;
-  items_used.setScore(player, score + 1);
+    const score = items_used.getScore(player) || 0;
+    items_used.setScore(player, score + 1);
 
-  if (event.itemStack.type.id === 'minecraft:ender_pearl') {
-    const score = pearls_used.getScore(player) || 0;
-    pearls_used.setScore(player, score + 1);
+    if (event.itemStack.type.id === 'minecraft:ender_pearl') {
+      const score = pearls_used.getScore(player) || 0;
+      pearls_used.setScore(player, score + 1);
+    }
+
+    if (DEBUG) world.sendMessage(`[itemUse] ${player.name} ${COLOR}used §r${event.itemStack.type.id}`);
+
+    if (DEBUG) cycleSidebar();
+  } catch (error) {
+    world.sendMessage(`${COLOR}[itemUse] ${COLOR_ERROR}Error: §r` + error);
   }
-
-  if (DEBUG) world.sendMessage(`${player.name} ${COLOR}used §r${event.itemStack.type.id}`);
-
-  if (DEBUG) cycleSidebar();
 });
 
 function gameTick() {
@@ -114,8 +131,8 @@ function gameTick() {
     if (currentTick === START_TICK) {
       world.sendMessage(`${COLOR}${TITLE} Script Loaded!` + (DEBUG ? ` §r§l§b${DEBUG_NUMBER}` : ""));
 
-      if (DEBUG) world.sendMessage(`${COLOR}SIDEBAR_TIMEOUT: §r${SIDEBAR_TIMEOUT}`);
-      if (DEBUG) world.sendMessage(`${COLOR}sidebarObjectiveArray: §r(${sidebarObjectiveArray.length}) ${sidebarObjectiveArray.map(obj => obj.displayName).join(', ')}`);
+      if (DEBUG) world.sendMessage(`${COLOR}[gameTick] SIDEBAR_TIMEOUT: §r${SIDEBAR_TIMEOUT}`);
+      if (DEBUG) world.sendMessage(`${COLOR}[gameTick] sidebarObjectiveArray: §r(${sidebarObjectiveArray.length}) ${sidebarObjectiveArray.map(obj => obj.displayName).join(', ')}`);
 
       if (DEBUG) setSidebar(debug);
 
@@ -125,64 +142,133 @@ function gameTick() {
 
     if (currentTick % SIDEBAR_TIMEOUT === 0) cycleSidebar();
 
+    if (DEBUG) world.sendMessage(`${COLOR}[gameTick#0]`);
+
     incrementTicks();
+
+    if (DEBUG) world.sendMessage(`${COLOR}[gameTick#1]`);
+
     checkLevelUp();
-  } catch (e) {
-    world.sendMessage(`${COLOR}Tick error: §r` + e);
+
+    if (DEBUG) world.sendMessage(`${COLOR}[gameTick#2]`);
+  } catch (error) {
+    world.sendMessage(`${COLOR}[gameTick] ${COLOR_ERROR}Error: §r` + error);
   }
 
   system.run(gameTick);
 }
 
 function setSidebar(objective: ScoreboardObjective) {
-  if (DEBUG) world.sendMessage(`${COLOR}Setting sidebar to §r${objective.displayName}`);
+  try {
+    if (DEBUG) world.sendMessage(`${COLOR}[setSidebar] Setting sidebar to §r${objective.displayName}`);
 
-  world.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, {
-    objective: objective,
-  });
+    world.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, {
+      objective: objective,
+    });
+  } catch (error) {
+    world.sendMessage(`${COLOR}[setSidebar] ${COLOR_ERROR}Error: §r` + error);
+  }
 }
 
 function incrementTicks() {
-  const players = world.getAllPlayers();
+  try {
+    if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#0]`);
 
-  for (const player of players) {
-    const score = ticks.getScore(player) || 0;
+    const players = world.getAllPlayers();
 
-    if (score % HOUR === 0) {
-      const hours = score / HOUR;
-      hours_played.setScore(player, hours);
+    if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#1]`);
 
-      if (DEBUG) world.sendMessage(`${COLOR}${player.name} has played for §r${hours} ${COLOR}hours!`);
+    for (const player of players) {
+      if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#2]`);
 
-      ticks.setScore(player, 1);
-    } else {
-      ticks.setScore(player, score + 1);
+      const score = ticks.getScore(player) || 0;
+
+      if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#3]`);
+
+      if (score % HOUR === 0) {
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#4]`);
+
+        const hours = score / HOUR;
+
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#5]`);
+
+        hours_played.setScore(player, hours);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#6]`);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks] ${player.name} has played for §r${hours} ${COLOR}hours!`);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#7]`);
+
+        ticks.setScore(player, 1);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#8]`);
+      } else {
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#9]`);
+
+        ticks.setScore(player, score + 1);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#10]`);
+      }
+
+      if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#11]`);
     }
+
+    if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#12]`);
+  } catch (error) {
+    world.sendMessage(`${COLOR}[incrementTicks] ${COLOR_ERROR}Error: §r` + error);
   }
 }
 
 function cycleSidebar() {
-  const currentSidebarIndex = ((debug.getScore('sidebard_index') || 0) + 1) % sidebarObjectiveArray.length;
+  try {
+    const currentSidebarIndex = ((debug.getScore('sidebard_index') || 0) + 1) % sidebarObjectiveArray.length;
 
-  if (DEBUG) world.sendMessage(`${COLOR}currentSidebarIndex: §r${currentSidebarIndex}`);
+    if (DEBUG) world.sendMessage(`${COLOR}[cycleSidebar] currentSidebarIndex: §r${currentSidebarIndex}`);
 
-  setSidebar(sidebarObjectiveArray[currentSidebarIndex]);
-  debug.setScore('sidebard_index', currentSidebarIndex);
+    setSidebar(sidebarObjectiveArray[currentSidebarIndex]);
+    debug.setScore('sidebard_index', currentSidebarIndex);
+  } catch (error) {
+    world.sendMessage(`${COLOR}[cycleSidebar] ${COLOR_ERROR}Error: §r` + error);
+  }
 }
 
 function checkLevelUp() {
-  const players = world.getAllPlayers();
+  try {
+    if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#0]`);
 
-  for (const player of players) {
-    const currentLevel = player.level;
-    const maxLevel = max_level.getScore(player) || 0;
+    const players = world.getAllPlayers();
 
-    if (currentLevel > maxLevel) {
-      max_level.setScore(player, currentLevel);
+    if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#1]`);
 
-      if (DEBUG) world.sendMessage(`${COLOR}${player.name} has reached level §r${currentLevel}!`);
+    for (const player of players) {
+      if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#2]`);
+
+      const currentLevel = player.level;
+      if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#3]`);
+
+      const maxLevel = max_level.getScore(player) || 0;
+      if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#4]`);
+
+      if (currentLevel > maxLevel) {
+        if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#5]`);
+
+        max_level.setScore(player, currentLevel);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#6]`);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp] ${player.name} has reached level §r${currentLevel}!`);
+
+        if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#7]`);
+      }
+
+      if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#8]`);
+
+      current_level.setScore(player, currentLevel);
+
+      if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#9]`);
     }
-
-    current_level.setScore(player, currentLevel);
+  } catch (error) {
+    world.sendMessage(`${COLOR}[checkLevelUp] ${COLOR_ERROR}Error: §r` + error);
   }
 }
