@@ -28,31 +28,47 @@ const MINUTE = 20 * 60;
 const HOUR = MINUTE * 60;
 const SIDEBAR_TIMEOUT = SECOND * 30;
 
-const debug = world.scoreboard.getObjective("debug") || world.scoreboard.addObjective("debug");
-const ticks = world.scoreboard.getObjective("ticks") || world.scoreboard.addObjective("ticks");
-const hours_played = world.scoreboard.getObjective("hours_played") || world.scoreboard.addObjective("hours_played", "Hours Played");
-const deaths = world.scoreboard.getObjective("deaths") || world.scoreboard.addObjective("deaths", "Deaths");
-const blocks_broken = world.scoreboard.getObjective("blocks_broken") || world.scoreboard.addObjective("blocks_broken", "Blocks Broken");
-const blocks_placed = world.scoreboard.getObjective("blocks_placed") || world.scoreboard.addObjective("blocks_placed", "Blocks Placed");
-const items_used = world.scoreboard.getObjective("items_used") || world.scoreboard.addObjective("items_used", "Items Used");
-const kills = world.scoreboard.getObjective("kills") || world.scoreboard.addObjective("kills", "Kills");
-const current_level = world.scoreboard.getObjective("current_level") || world.scoreboard.addObjective("current_level", "Current Level");
-const max_level = world.scoreboard.getObjective("max_level") || world.scoreboard.addObjective("max_level", "Max Level");
-const pearls_used = world.scoreboard.getObjective("pearls_used") || world.scoreboard.addObjective("pearls_used", "Pearls Used");
+var debug: ScoreboardObjective;
+var ticks: ScoreboardObjective;
+var hours_played: ScoreboardObjective;
+var deaths: ScoreboardObjective;
+var blocks_broken: ScoreboardObjective;
+var blocks_placed: ScoreboardObjective;
+var items_used: ScoreboardObjective;
+var kills: ScoreboardObjective;
+var current_level: ScoreboardObjective;
+var max_level: ScoreboardObjective;
+var pearls_used: ScoreboardObjective;
 
-const sidebarObjectiveArray = [
-  // debug,
-  // ticks,
-  hours_played,
-  deaths,
-  blocks_broken,
-  blocks_placed,
-  // items_used,
-  kills,
-  current_level,
-  max_level,
-  pearls_used
-];
+var sidebarObjectiveArray: any[] = [];
+
+function initializeScoreboards() {
+  debug = world.scoreboard.getObjective("debug") || world.scoreboard.addObjective("debug");
+  ticks = world.scoreboard.getObjective("ticks") || world.scoreboard.addObjective("ticks");
+  hours_played = world.scoreboard.getObjective("hours_played") || world.scoreboard.addObjective("hours_played", "Hours Played");
+  deaths = world.scoreboard.getObjective("deaths") || world.scoreboard.addObjective("deaths", "Deaths");
+  blocks_broken = world.scoreboard.getObjective("blocks_broken") || world.scoreboard.addObjective("blocks_broken", "Blocks Broken");
+  blocks_placed = world.scoreboard.getObjective("blocks_placed") || world.scoreboard.addObjective("blocks_placed", "Blocks Placed");
+  items_used = world.scoreboard.getObjective("items_used") || world.scoreboard.addObjective("items_used", "Items Used");
+  kills = world.scoreboard.getObjective("kills") || world.scoreboard.addObjective("kills", "Kills");
+  current_level = world.scoreboard.getObjective("current_level") || world.scoreboard.addObjective("current_level", "Current Level");
+  max_level = world.scoreboard.getObjective("max_level") || world.scoreboard.addObjective("max_level", "Max Level");
+  pearls_used = world.scoreboard.getObjective("pearls_used") || world.scoreboard.addObjective("pearls_used", "Pearls Used");
+
+  sidebarObjectiveArray = [
+    // debug,
+    // ticks,
+    hours_played,
+    deaths,
+    blocks_broken,
+    blocks_placed,
+    // items_used,
+    kills,
+    current_level,
+    max_level,
+    pearls_used
+  ];
+}
 
 system.run(gameTick);
 
@@ -60,6 +76,7 @@ world.afterEvents.entityDie.subscribe((event) => {
   try {
     if (event.deadEntity.typeId != 'minecraft:player') {
       const player = event.damageSource.damagingEntity as Player;
+      if (!player) throw new Error("Damaging entity is not a player");
 
       const score = kills.getScore(player) || 0;
       kills.setScore(player, score + 1);
@@ -67,6 +84,7 @@ world.afterEvents.entityDie.subscribe((event) => {
       if (DEBUG) world.sendMessage(`[entityDie] ${player.name} ${COLOR}killed §r${event.deadEntity.typeId}${COLOR}!`);
     } else {
       const player = event.deadEntity as Player;
+      if (!player) throw new Error("Dead entity is not a player");
 
       const score = deaths.getScore(player) || 0;
       deaths.setScore(player, score + 1);
@@ -81,6 +99,7 @@ world.afterEvents.entityDie.subscribe((event) => {
 world.afterEvents.playerBreakBlock.subscribe((event: PlayerBreakBlockAfterEvent) => {
   try {
     const player = event.player;
+    if (!player) throw new Error("Player not found in playerBreakBlock event");
 
     const score = blocks_broken.getScore(player) || 0;
     blocks_broken.setScore(player, score + 1);
@@ -94,6 +113,7 @@ world.afterEvents.playerBreakBlock.subscribe((event: PlayerBreakBlockAfterEvent)
 world.afterEvents.playerPlaceBlock.subscribe((event: PlayerPlaceBlockAfterEvent) => {
   try {
     const player = event.player;
+    if (!player) throw new Error("Player not found in playerPlaceBlock event");
 
     const score = blocks_placed.getScore(player) || 0;
     blocks_placed.setScore(player, score + 1);
@@ -106,7 +126,8 @@ world.afterEvents.playerPlaceBlock.subscribe((event: PlayerPlaceBlockAfterEvent)
 
 world.afterEvents.itemUse.subscribe((event) => {
   try {
-    const player = event.source;
+    const player = event.source as Player;
+    if (!player) throw new Error("Player not found in itemUse event");
 
     const score = items_used.getScore(player) || 0;
     items_used.setScore(player, score + 1);
@@ -179,6 +200,11 @@ function incrementTicks() {
     if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#1]`);
 
     for (const player of players) {
+      if (!player) {
+        if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks] ${COLOR_ERROR}Player not found`);
+        continue;
+      }
+
       if (DEBUG) world.sendMessage(`${COLOR}[incrementTicks#2]`);
 
       const score = ticks.getScore(player) || 0;
@@ -242,6 +268,11 @@ function checkLevelUp() {
     if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#1]`);
 
     for (const player of players) {
+      if (!player) {
+        if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp] ${COLOR_ERROR}Player not found`);
+        continue;
+      }
+
       if (DEBUG) world.sendMessage(`${COLOR}[checkLevelUp#2]`);
 
       const currentLevel = player.level;
