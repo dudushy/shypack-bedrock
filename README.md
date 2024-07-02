@@ -12,12 +12,16 @@
     ```powershell
     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
     ```
-2. Install packages:
+2. Ensure that the Minecraft Bedrock Edition client can make "loopback" requests using `PowerShell`:
+    ```powershell
+    CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-1958404141-86561845-1752920682-3514627264-368642714-62675701-733520436
+    ```
+3. Install packages:
     ```bash
     npm ci
     ```
-3. Select the addon you want to build then rename the `PROJECT_NAME` in the `.env` file
-4. Run project:
+4. Select the addon you want to build then rename the `PROJECT_NAME` in the `.env` file
+5. Run project:
     ```bash
     npm start
     ```
