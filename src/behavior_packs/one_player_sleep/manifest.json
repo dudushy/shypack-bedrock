@@ -4,8 +4,8 @@
     "name": "§i§l[§u§lSHY§i§l] §9One Player Sleep§r",
     "description": "§i§l[§s§lBP§i§l] §r§9Allows one player to sleep and skip the night.§r",
     "uuid": "57cef75e-54f3-4621-a5b5-81161b705dbd",
-    "version": [1, 0, 1],
-    "min_engine_version": [1, 20, 30]
+    "version": [1, 0, 2],
+    "min_engine_version": [1, 21, 0]
   },
   "modules": [
     {
@@ -19,7 +19,7 @@
   "dependencies": [
     {
       "module_name": "@minecraft/server",
-      "version": "1.8.0"
+      "version": "1.11.0"
     }
   ]
 }
