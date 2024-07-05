@@ -1,4 +1,8 @@
+// import * as coreBuildTasks from "@minecraft/core-build-tasks"
+// import * as math from "@minecraft/math"
 import * as server from "@minecraft/server";
+// import * as serverUi from "@minecraft/server-ui"
+// import * as vanillaData from "@minecraft/vanilla-data"
 
 const DEBUG = true;
 
@@ -45,15 +49,14 @@ const sidebarObjectiveArray = [
 
 server.system.run(gameTick);
 
-server.world.afterEvents.entityDie.subscribe((event) => {
+server.world.afterEvents.entityDie.subscribe((event: server.EntityDieAfterEvent) => {
   try {
     if (event.deadEntity.typeId != 'minecraft:player') {
       const player = event.damageSource.damagingEntity as server.Player;
       if (!player) throw new Error("Player is undefined");
 
       const playerIdentity = player.scoreboardIdentity;
-      // if (!playerIdentity) throw new Error("Player identity is undefined");
-      log(`${COLOR}[entityDie] Player identity is undefined`);
+      if (!playerIdentity) throw new Error("Player identity is undefined");
 
       const score = kills.getScore(player) || 0;
       kills.setScore(player, score + 1);
@@ -64,8 +67,7 @@ server.world.afterEvents.entityDie.subscribe((event) => {
       if (!player) throw new Error("Player is undefined");
 
       const playerIdentity = player.scoreboardIdentity;
-      // if (!playerIdentity) throw new Error("Player identity is undefined");
-      log(`${COLOR}[entityDie] Player identity is undefined`);
+      if (!playerIdentity) throw new Error("Player identity is undefined");
 
       const score = deaths.getScore(player) || 0;
       deaths.setScore(player, score + 1);
@@ -83,8 +85,7 @@ server.world.afterEvents.playerBreakBlock.subscribe((event: server.PlayerBreakBl
     if (!player) throw new Error("Player is undefined");
 
     const playerIdentity = player.scoreboardIdentity;
-    // if (!playerIdentity) throw new Error("Player identity is undefined");
-    log(`${COLOR}[playerBreakBlock] Player identity is undefined` + playerIdentity);
+    if (!playerIdentity) throw new Error("Player identity is undefined");
 
     const score = blocks_broken.getScore(player) || 0;
     blocks_broken.setScore(player, score + 1);
@@ -101,8 +102,7 @@ server.world.afterEvents.playerPlaceBlock.subscribe((event: server.PlayerPlaceBl
     if (!player) throw new Error("Player is undefined");
 
     const playerIdentity = player.scoreboardIdentity;
-    // if (!playerIdentity) throw new Error("Player identity is undefined");
-    log(`${COLOR}[playerPlaceBlock] Player identity is undefined`);
+    if (!playerIdentity) throw new Error("Player identity is undefined");
 
     const score = blocks_placed.getScore(player) || 0;
     blocks_placed.setScore(player, score + 1);
@@ -113,14 +113,13 @@ server.world.afterEvents.playerPlaceBlock.subscribe((event: server.PlayerPlaceBl
   }
 });
 
-server.world.afterEvents.itemUse.subscribe((event) => {
+server.world.afterEvents.itemUse.subscribe((event: server.ItemUseAfterEvent) => {
   try {
     const player = event.source as server.Player;
     if (!player) throw new Error("Player is undefined");
 
     const playerIdentity = player.scoreboardIdentity;
-    // if (!playerIdentity) throw new Error("Player identity is undefined");
-    log(`${COLOR}[itemUse] Player identity is undefined`);
+    if (!playerIdentity) throw new Error("Player identity is undefined");
 
     const score = items_used.getScore(player) || 0;
     items_used.setScore(player, score + 1);
@@ -163,11 +162,11 @@ function gameTick() {
 
     // log(`${COLOR}[gameTick#0]`);
 
-    // incrementTicks();
+    incrementTicks();
 
     // log(`${COLOR}[gameTick#1]`);
 
-    // checkLevelUp();
+    checkLevelUp();
 
     // log(`${COLOR}[gameTick#2]`);
   } catch (error) {
@@ -202,7 +201,7 @@ function incrementTicks() {
 
       if (!player) {
         log(`${COLOR}[incrementTicks] ${COLOR_ERROR}Player not found`);
-        // continue;
+        continue;
       }
 
       log(`${COLOR}[incrementTicks#1b]`);
@@ -213,7 +212,7 @@ function incrementTicks() {
 
       if (!playerIdentity) {
         log(`${COLOR}[incrementTicks] ${COLOR_ERROR}Player identity not found`);
-        // continue;
+        continue;
       }
 
       log(`${COLOR}[incrementTicks#2]`);
@@ -281,7 +280,7 @@ function checkLevelUp() {
     for (const player of players) {
       if (!player) {
         log(`${COLOR}[checkLevelUp] ${COLOR_ERROR}Player not found`);
-        // continue;
+        continue;
       }
 
       log(`${COLOR}[checkLevelUp#1a]`);
@@ -292,7 +291,7 @@ function checkLevelUp() {
 
       if (!playerIdentity) {
         log(`${COLOR}[checkLevelUp] ${COLOR_ERROR}Player identity not found`);
-        // continue;
+        continue;
       }
 
       log(`${COLOR}[checkLevelUp#2]`);
